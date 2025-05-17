@@ -1,0 +1,173 @@
+/* Basic Reset & Layout */
+body{font-family:sans-serif;display:flex;flex-direction:column;height:100vh;margin:0;background-color:#f4f4f4;}
+#controls{padding:10px 15px;background-color:#e0e0e0;border-bottom:1px solid #ccc; display: flex; align-items: center; flex-wrap: wrap; gap: 15px;}
+#controls label { margin-right: 5px; }
+.toggle-group label { margin-left: 5px; margin-right: 10px; font-weight: normal; cursor: pointer;}
+.toggle-group input { margin-right: 3px; vertical-align: middle; }
+
+#mainContent{
+    display:flex;
+    flex-grow:1;
+    overflow:hidden; /* Prevent content from breaking layout */
+}
+
+#fileTreeContainer{
+    /* width:40%; REMOVED - Use flex-basis */
+    flex-basis: 40%; /* Initial width */
+    min-width: 250px; /* Minimum reasonable width */
+    max-width: 80%; /* Maximum reasonable width */
+    padding: 15px;
+    overflow-y: auto;
+    border-right: none; /* Removed, resizer handles visual separation */
+    background-color:#fff;
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0; /* Don't shrink by default */
+    /* resize: horizontal; */ /* Native resize conflicts with custom one */
+    overflow-x: hidden; /* Prevent its own horizontal scroll */
+}
+
+/* Resizer Styles */
+#resizer {
+    flex-basis: 5px; /* Width of the drag handle */
+    flex-shrink: 0;
+    background-color: #ccc;
+    cursor: col-resize;
+    border-left: 1px solid #bbb;
+    border-right: 1px solid #bbb;
+}
+#resizer:hover {
+    background-color: #bbb;
+}
+/* Style body during resize */
+body.resizing {
+    cursor: col-resize;
+    user-select: none; /* Prevent text selection during drag */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+
+#combinedViewerContainer{
+    flex-grow: 1; /* Takes remaining space */
+    min-width: 0; /* Important Flexbox fix for overflow */
+    padding: 15px;
+    display:flex;
+    flex-direction:column;
+    background-color:#f9f9f9;
+    box-sizing: border-box;
+    overflow: hidden; /* Prevent viewer from overflowing */
+}
+#combinedHeader{display:flex;justify-content:space-between;align-items:center;font-weight:bold;margin-bottom:5px; flex-shrink: 0;}
+#combinedHeader span{margin-right:10px;}
+#combinedContentWrapper{
+    display:flex;
+    flex-grow:1;
+    border:1px solid #ccc;
+    background-color:white;
+    overflow: hidden; /* Wrapper should also prevent overflow */
+}
+#lineNumbers{
+    font-family:monospace;
+    font-size:0.9em;
+    line-height:1.5; /* Match code view */
+    padding:5px 3px 5px 5px;
+    text-align:right;
+    color:grey;
+    background-color:#f1f1f1;
+    border-right:1px solid #ccc;
+    overflow:hidden; /* Hide internal overflow */
+    user-select:none;
+    -webkit-user-select:none;
+    /* white-space:pre; No longer using single text node */
+    box-sizing:border-box;
+    flex-shrink: 0;
+}
+/* Style for individual line number divs (required for highlighting) */
+#lineNumbers div {
+    min-height: 1.5em; /* Match line height */
+    box-sizing: border-box;
+}
+
+/* Style for Go To highlight */
+#lineNumbers .line-highlight {
+    background-color: rgba(255, 255, 0, 0.5); /* Yellow highlight */
+    display: inline-block; /* Needed for background */
+    width: 100%; /* Take full width */
+    transition: background-color 0.3s ease-out; /* Smooth fade out */
+}
+
+
+/* Style the <pre> and <code> elements */
+#combinedContentPre {
+    flex-grow: 1;
+    min-width: 0; /* Allow shrinking */
+    box-sizing: border-box;
+    font-family: monospace;
+    font-size: 0.9em;
+    line-height: 1.5;
+    white-space: pre; /* Keep whitespace, allows horizontal scroll */
+    overflow: auto;   /* Enable BOTH vertical and horizontal scrolling */
+    border: none;
+    padding: 5px;
+    margin: 0;
+    height: 100%;
+    background-color: white; /* Base background if theme doesn't cover */
+}
+#combinedContentPre:focus {
+    outline: none;
+}
+#combinedContentCode {
+    display: block;
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    white-space: inherit;
+    min-height: 100%;
+    /* Background is set by highlight.js theme */
+}
+/* Placeholder text */
+#combinedContentCode:empty::before {
+    content: 'Click on files in the tree to see their combined content here...';
+    color: #888;
+    font-style: italic;
+    background-color: transparent !important;
+}
+
+
+#loadingIndicator{margin-left:15px;font-style:italic;color:#555;display:none;}
+#errorMessage{color:red;margin-top:10px;padding:0 15px;}
+
+/* --- File Tree Styling --- */
+#fileTree, #fileTree ul { list-style-type: none; padding-left: 0; margin-left: 0; position: relative; }
+#fileTree ul { margin-left: 18px; }
+#fileTree ul::before { content: ''; position: absolute; top: 0; bottom: 0; left: 8px; width: 1px; background: #ccc; z-index: 0; }
+#fileTree li { padding: 2px 5px 2px 25px; margin: 1px 0; border-radius: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; cursor: default; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; }
+#fileTree li::before { content: ''; position: absolute; top: 10px; left: 8px; width: 12px; height: 1px; background: #ccc; z-index: 0; }
+#fileTree li::after { content: ''; position: absolute; top: 10px; bottom: 0; left: 8px; width: 1px; background: #ccc; z-index: 0; }
+#fileTree li:last-child::after { display: none; }
+#fileTree li.folder > .folder-label { cursor: pointer; font-weight: bold; }
+#fileTree li.folder > .folder-label > .folder-toggle { position: absolute; left: 10px; top: 3px; width: 15px; height: 15px; cursor: pointer; display: inline-block; text-align: center; font-size: 0.8em; line-height: 15px; z-index: 1; background-color: #fff; /* Cover line */ }
+#fileTree li.folder.collapsed > ul { display: none; }
+#fileTree li.folder.collapsed > .folder-label > .folder-toggle::before { content: '►'; }
+#fileTree li.folder:not(.collapsed) > .folder-label > .folder-toggle::before { content: '▼'; }
+#fileTree li.file { cursor: pointer; }
+#fileTree li.file::after { display: none; }
+#fileTree li.file:hover { background-color: #eee; }
+#fileTree li.selected { background-color: #007bff; color: white; }
+#fileTree li.selected:hover { background-color: #0056b3; }
+#fileTree .token-count { font-size: 0.8em; color: #888; margin-left: 5px; }
+#fileTree li.selected .token-count { color: #eee; }
+#fileTree > li { padding-left: 10px; }
+#fileTree > li::before { left: -8px; width: 15px; }
+#fileTree > li::after { left: -8px; top: 10px; }
+#fileTree > li:last-child::after { display: none; }
+#fileTree > li.folder > .folder-label > .folder-toggle { left: -5px; }
+
+/* --- Context Menu --- */
+#contextMenu{position:absolute;display:none;background-color:white;border:1px solid #ccc;box-shadow:2px 2px 5px rgba(0,0,0,0.2);padding:5px 0;min-width:180px;z-index:1000;}
+#contextMenu ul{list-style:none;padding:0;margin:0;}
+#contextMenu li{padding:5px 15px;cursor:pointer;}
+#contextMenu li:hover{background-color:#eee;}
+#contextMenu li.disabled{color:grey;cursor:default;background-color:transparent;}
